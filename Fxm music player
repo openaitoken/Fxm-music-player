@@ -12,7 +12,7 @@ local closeButton = Instance.new("TextButton")
 local minimizeButton = Instance.new("TextButton")
 local title = Instance.new("TextLabel")
 
-gui.Name = "FyanPlay"
+gui.Name = "FXMmusicplayer"
 gui.ResetOnSpawn = false
 gui.Parent = player:WaitForChild("PlayerGui")
 
@@ -56,7 +56,6 @@ local icon = Instance.new("ImageLabel")
 icon.Name = "Icon"
 icon.Size = UDim2.new(0, 30, 0, 30)
 icon.Position = UDim2.new(0, 10, 0, 5)
-icon.Image = "rbxassetid://121445381467948"
 icon.BackgroundTransparency = 1
 icon.Parent = frame
 
@@ -161,175 +160,161 @@ local endedConnection = nil
 local originalElementStates = {}
 
 local function cleanUpSound()
-    if currentSound then
-        currentSound:Stop()
-        currentSound:Destroy()
-        currentSound = nil
-    end
-
-    if timeUpdateConnection then
-        timeUpdateConnection:Disconnect()
-        timeUpdateConnection = nil
-    end
-
-    if endedConnection then
-        endedConnection:Disconnect()
-        endedConnection = nil
-    end
+	if currentSound then
+		currentSound:Stop()
+		currentSound:Destroy()
+		currentSound = nil
+	end
+	if timeUpdateConnection then
+		timeUpdateConnection:Disconnect()
+		timeUpdateConnection = nil
+	end
+	if endedConnection then
+		endedConnection:Disconnect()
+		endedConnection = nil
+	end
 end
 
 local function toggleMinimize()
-    isMinimized = not isMinimized
-
-    if isMinimized then
-        originalElementStates = {
-            textBox = {Visible = textBox.Visible},
-            playButton = {Visible = playButton.Visible},
-            stopButton = {Visible = stopButton.Visible},
-            loopButton = {Visible = loopButton.Visible},
-            closeButton = {Visible = closeButton.Visible},
-            timeDisplay = {Visible = timeDisplay.Visible}
-        }
-
-        textBox.Visible = false
-        playButton.Visible = false
-        stopButton.Visible = false
-        loopButton.Visible = false
-        closeButton.Visible = false
-        timeDisplay.Visible = false
-
-        frame.Size = minimizedSize
-        minimizeButton.Text = "+"
-    else
-        textBox.Visible = originalElementStates.textBox.Visible
-        playButton.Visible = originalElementStates.playButton.Visible
-        stopButton.Visible = originalElementStates.stopButton.Visible
-        loopButton.Visible = originalElementStates.loopButton.Visible
-        closeButton.Visible = originalElementStates.closeButton.Visible
-        timeDisplay.Visible = originalElementStates.timeDisplay.Visible
-
-        frame.Size = originalSize
-        minimizeButton.Text = "-"
-    end
+	isMinimized = not isMinimized
+	if isMinimized then
+		originalElementStates = {
+			textBox = {Visible = textBox.Visible},
+			playButton = {Visible = playButton.Visible},
+			stopButton = {Visible = stopButton.Visible},
+			loopButton = {Visible = loopButton.Visible},
+			closeButton = {Visible = closeButton.Visible},
+			timeDisplay = {Visible = timeDisplay.Visible}
+		}
+		textBox.Visible = false
+		playButton.Visible = false
+		stopButton.Visible = false
+		loopButton.Visible = false
+		closeButton.Visible = false
+		timeDisplay.Visible = false
+		frame.Size = minimizedSize
+		minimizeButton.Text = "+"
+	else
+		textBox.Visible = originalElementStates.textBox.Visible
+		playButton.Visible = originalElementStates.playButton.Visible
+		stopButton.Visible = originalElementStates.stopButton.Visible
+		loopButton.Visible = originalElementStates.loopButton.Visible
+		closeButton.Visible = originalElementStates.closeButton.Visible
+		timeDisplay.Visible = originalElementStates.timeDisplay.Visible
+		frame.Size = originalSize
+		minimizeButton.Text = "-"
+	end
 end
 
 minimizeButton.MouseButton1Click:Connect(toggleMinimize)
 
 local function formatTime(seconds)
-    local minutes = math.floor(seconds / 60)
-    local remainingSeconds = math.floor(seconds % 60)
-    return string.format("%02d:%02d", minutes, remainingSeconds)
+	local minutes = math.floor(seconds / 60)
+	local remainingSeconds = math.floor(seconds % 60)
+	return string.format("%02d:%02d", minutes, remainingSeconds)
 end
 
 local function updateTimeDisplay(sound)
-    if sound and sound.IsPlaying then
-        local currentTime = formatTime(sound.TimePosition)
-        local totalTime = formatTime(sound.TimeLength)
-        timeDisplay.Text = currentTime.." / "..totalTime
-    else
-        timeDisplay.Text = "00:00 / 00:00"
-    end
+	if sound and sound.IsPlaying then
+		local currentTime = formatTime(sound.TimePosition)
+		local totalTime = formatTime(sound.TimeLength)
+		timeDisplay.Text = currentTime.." / "..totalTime
+	else
+		timeDisplay.Text = "00:00 / 00:00"
+	end
 end
 
 local function startTimeTracker(sound)
-    if timeUpdateConnection then
-        timeUpdateConnection:Disconnect()
-    end
-
-    timeUpdateConnection = game:GetService("RunService").Heartbeat:Connect(function()
-        updateTimeDisplay(sound)
-    end)
+	if timeUpdateConnection then
+		timeUpdateConnection:Disconnect()
+	end
+	timeUpdateConnection = game:GetService("RunService").Heartbeat:Connect(function()
+		updateTimeDisplay(sound)
+	end)
 end
 
 local function startDrag(frame)
-    local dragging = false
-    local dragInput, dragStart
+	local dragging = false
+	local dragInput, dragStart
 
-    frame.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true
-            dragStart = input.Position
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    dragging = false
-                end
-            end)
-        end
-    end)
+	frame.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = true
+			dragStart = input.Position
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then
+					dragging = false
+				end
+			end)
+		end
+	end)
 
-    frame.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-            dragInput = input
-        end
-    end)
+	frame.InputChanged:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+			dragInput = input
+		end
+	end)
 
-    UserInputService.InputChanged:Connect(function(input)
-        if dragging and input == dragInput then
-            local delta = input.Position - dragStart
-            frame.Position = UDim2.new(
-                frame.Position.X.Scale,
-                frame.Position.X.Offset + delta.X,
-                frame.Position.Y.Scale,
-                frame.Position.Y.Offset + delta.Y
-            )
-            dragStart = input.Position
-        end
-    end)
+	UserInputService.InputChanged:Connect(function(input)
+		if dragging and input == dragInput then
+			local delta = input.Position - dragStart
+			frame.Position = UDim2.new(
+				frame.Position.X.Scale,
+				frame.Position.X.Offset + delta.X,
+				frame.Position.Y.Scale,
+				frame.Position.Y.Offset + delta.Y
+			)
+			dragStart = input.Position
+		end
+	end)
 end
 
 startDrag(frame)
 
 loopButton.MouseButton1Click:Connect(function()
-    isLooping = not isLooping
-    loopButton.Text = "🔁 LOOP: " .. (isLooping and "ON" or "OFF")
-    loopButton.BackgroundColor3 = isLooping and Color3.fromRGB(0, 180, 80) or Color3.fromRGB(100, 100, 100)
-
-    if currentSound then
-        currentSound.Looped = isLooping
-
-        if isLooping and not currentSound.IsPlaying then
-            currentSound:Play()
-        end
-    end
+	isLooping = not isLooping
+	loopButton.Text = "🔁 LOOP: " .. (isLooping and "ON" or "OFF")
+	loopButton.BackgroundColor3 = isLooping and Color3.fromRGB(0, 180, 80) or Color3.fromRGB(100, 100, 100)
+	if currentSound then
+		currentSound.Looped = isLooping
+		if isLooping and not currentSound.IsPlaying then
+			currentSound:Play()
+		end
+	end
 end)
 
 playButton.MouseButton1Click:Connect(function()
-    local audioId = textBox.Text
-    if audioId == "" then return end
-
-    cleanUpSound()
-
-    local sound = Instance.new("Sound")
-    sound.SoundId = "rbxassetid://"..audioId
-    sound.Looped = isLooping
-    sound.Parent = workspace
-
-    sound.Loaded:Wait()
-    sound:Play()
-
-    currentSound = sound
-    startTimeTracker(sound)
-
-    endedConnection = sound.Ended:Connect(function()
-        if not isLooping then
-            cleanUpSound()
-            timeDisplay.Text = "00:00 / "..formatTime(sound.TimeLength)
-        else
-            sound:Play()
-        end
-    end)
+	local audioId = textBox.Text
+	if audioId == "" then return end
+	cleanUpSound()
+	local sound = Instance.new("Sound")
+	sound.SoundId = "rbxassetid://"..audioId
+	sound.Looped = isLooping
+	sound.Parent = workspace
+	sound.Loaded:Wait()
+	sound:Play()
+	currentSound = sound
+	startTimeTracker(sound)
+	endedConnection = sound.Ended:Connect(function()
+		if not isLooping then
+			cleanUpSound()
+			timeDisplay.Text = "00:00 / "..formatTime(sound.TimeLength)
+		else
+			sound:Play()
+		end
+	end)
 end)
 
 stopButton.MouseButton1Click:Connect(function()
-    cleanUpSound()
-    timeDisplay.Text = "00:00 / 00:00"
+	cleanUpSound()
+	timeDisplay.Text = "00:00 / 00:00"
 end)
 
 closeButton.MouseButton1Click:Connect(function()
-    gui:Destroy()
-    if currentSound then
-        currentSound:Stop()
-        currentSound:Destroy()
-        currentSound = nil
-    end
+	gui:Destroy()
+	if currentSound then
+		currentSound:Stop()
+		currentSound:Destroy()
+		currentSound = nil
+	end
 end)
